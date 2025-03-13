@@ -85,3 +85,37 @@ if st.button('Predict'):
     prediction_text = prediction_labels.get(prediction[0], "Unknown")
     st.subheader('Prediction')
     st.write(f"Prediction: **{prediction_text}**")
+    
+    from gradio_client import Client
+    advise_prompt = """A patient has been evaluated based on the following medical parameters:
+
+                        Age: {age} years
+                        Sex: {'Male' if sex == 1 else 'Female'}
+                        Chest Pain Type: {['Asymptomatic', 'Atypical Angina', 'Non-Anginal', 'Typical Angina'][cp]}
+                        Resting Blood Pressure: {trestbps} mmHg
+                        Cholesterol Level: {chol} mg/dL
+                        Fasting Blood Sugar > 120 mg/dL: {'Yes' if fbs == 1 else 'No'}
+                        Resting Electrocardiographic Results: {['Left Ventricular Hypertrophy', 'Normal', 'ST-T'][restecg]}
+                        Maximum Heart Rate Achieved: {thalach} bpm
+                        Exercise Induced Angina: {'Yes' if exang == 1 else 'No'}
+                        ST Depression Induced by Exercise: {oldpeak}
+                        Slope of the Peak Exercise ST Segment: {['Downsloping', 'Flat', 'Upsloping'][slope]}
+                        Number of Major Vessels Colored by Fluoroscopy: {ca}
+                        Thalassemia Type: {['Fixed', 'Normal', 'Reversible'][thal]}
+                        The patient has been diagnosed with {heart_disease}.
+
+                        Please provide a concise 3-line recommendation on how the patient can manage or improve their condition, including lifestyle changes, dietary adjustments, and medical advice."""
+                          
+    client = Client("KingNish/Very-Fast-Chatbot")
+    result = client.predict(
+            Query=advice_prompt,
+            api_name="/predict"
+    )
+    result = result.strip().replace("\n", "\n\n")  # Double newline = markdown list-friendly in Streamlit
+
+    st.markdown("### 📋 Recommended Next Steps")
+    st.markdown(f"""
+            <div style="background-color: #f9f9f9; padding: 15px; border-left: 5px solid #0073e6; border-radius: 8px; margin-top: 10px;">
+                <span style="font-size: 16px;">{result}</span>
+            </div>
+        """, unsafe_allow_html=True)
