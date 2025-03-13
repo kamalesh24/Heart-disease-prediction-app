@@ -111,7 +111,7 @@ if st.button('Predict'):
     
     client = Client("KingNish/Very-Fast-Chatbot")
     result = client.predict(
-            Query=advice_prompt+ "diagonised with "+prediction_text,
+            Query=advice_prompt+ "diagonised with "+prediction_text +"provide ans in normal text",
             api_name="/predict"
     )
     result = result.strip().replace("\n", "\n\n")  # Double newline = markdown list-friendly in Streamlit
