@@ -109,4 +109,4 @@ if st.button('🩺 Predict Heart Disease'):
 
 # Footer with credits
 st.markdown("---")
-st.markdown("📝 Developed by **Your Name** | 🔗 [GitHub](https://github.com/yourusername) | 📧 Contact: your.email@example.com")
+st.markdown("📝 Developed by **Hari Prashand** | 🔗 [GitHub](https://github.com/HariPrashand)")
