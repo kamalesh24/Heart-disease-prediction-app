@@ -1,3 +1,4 @@
 streamlit
 xgboost
 pandas
+gradio_client
