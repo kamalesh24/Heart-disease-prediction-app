@@ -114,7 +114,7 @@ if st.button('Predict'):
             Query=advice_prompt+ "diagonised with "+prediction_text +"provide ans in normal text",
             api_name="/predict"
     )
-    result = result.strip().replace("\n", "\n\n")  # Double newline = markdown list-friendly in Streamlit
+    # result = result.strip().replace("\n", "\n\n")  # Double newline = markdown list-friendly in Streamlit
     
 
     st.markdown("### 📋 Recommended Next Steps")
