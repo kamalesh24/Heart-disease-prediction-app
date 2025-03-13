@@ -80,7 +80,7 @@ def user_input_features():
                         Number of Major Vessels Colored by Fluoroscopy: {ca}
                         Thalassemia Type: {['Fixed', 'Normal', 'Reversible'][thal]}
 
-                        Please provide a concise 3-line recommendation on how the patient can manage or improve their condition, including lifestyle changes, dietary adjustments, and medical advice."""
+                        Please provide a concise recommendation on how the patient can manage or improve their condition, including lifestyle changes, dietary adjustments, and medical advice."""
                           
     
     return (features, advice_prompt)
