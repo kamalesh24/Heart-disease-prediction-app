@@ -62,30 +62,7 @@ def user_input_features():
         'thal': thal
     }
     features = pd.DataFrame(data, index=[0])
-    return features
 
-input_data = user_input_features()
-
-# Display user input
-st.subheader('User Input Parameters')
-st.write(input_data)
-
-# Prediction button
-if st.button('Predict'):
-    prediction = predict(input_data)
-    prediction_labels = {
-        0: "No Heart Disease",
-        1: "Arrhythmia",
-        2: "Cardiomyopathy",
-        3: "Congenital Heart Disease",
-        4: "Coronary Artery Disease",
-        5: "Heart Failure",
-        6: "Valvular Heart Disease"
-    }
-    prediction_text = prediction_labels.get(prediction[0], "Unknown")
-    st.subheader('Prediction')
-    st.write(f"Prediction: **{prediction_text}**")
-    
     from gradio_client import Client
     advice_prompt = f"""A patient has been evaluated based on the following medical parameters:
 
@@ -112,6 +89,31 @@ if st.button('Predict'):
             api_name="/predict"
     )
     result = result.strip().replace("\n", "\n\n")  # Double newline = markdown list-friendly in Streamlit
+    
+    return (features, result)
+
+input_data , result = user_input_features()
+
+# Display user input
+st.subheader('User Input Parameters')
+st.write(input_data)
+
+# Prediction button
+if st.button('Predict'):
+    prediction = predict(input_data)
+    prediction_labels = {
+        0: "No Heart Disease",
+        1: "Arrhythmia",
+        2: "Cardiomyopathy",
+        3: "Congenital Heart Disease",
+        4: "Coronary Artery Disease",
+        5: "Heart Failure",
+        6: "Valvular Heart Disease"
+    }
+    prediction_text = prediction_labels.get(prediction[0], "Unknown")
+    st.subheader('Prediction')
+    st.write(f"Prediction: **{prediction_text}**")
+    
 
     st.markdown("### 📋 Recommended Next Steps")
     st.markdown(f"""
