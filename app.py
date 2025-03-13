@@ -87,7 +87,7 @@ if st.button('Predict'):
     st.write(f"Prediction: **{prediction_text}**")
     
     from gradio_client import Client
-    advise_prompt = """A patient has been evaluated based on the following medical parameters:
+    advice_prompt = f"""A patient has been evaluated based on the following medical parameters:
 
                         Age: {age} years
                         Sex: {'Male' if sex == 1 else 'Female'}
