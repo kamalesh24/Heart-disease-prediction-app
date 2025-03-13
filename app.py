@@ -63,7 +63,7 @@ def user_input_features():
     }
     features = pd.DataFrame(data, index=[0])
 
-    from gradio_client import Client
+    
     advice_prompt = f"""A patient has been evaluated based on the following medical parameters:
 
                         Age: {age} years
@@ -79,20 +79,13 @@ def user_input_features():
                         Slope of the Peak Exercise ST Segment: {['Downsloping', 'Flat', 'Upsloping'][slope]}
                         Number of Major Vessels Colored by Fluoroscopy: {ca}
                         Thalassemia Type: {['Fixed', 'Normal', 'Reversible'][thal]}
-                        The patient has been diagnosed with {heart_disease}.
 
                         Please provide a concise 3-line recommendation on how the patient can manage or improve their condition, including lifestyle changes, dietary adjustments, and medical advice."""
                           
-    client = Client("KingNish/Very-Fast-Chatbot")
-    result = client.predict(
-            Query=advice_prompt,
-            api_name="/predict"
-    )
-    result = result.strip().replace("\n", "\n\n")  # Double newline = markdown list-friendly in Streamlit
     
-    return (features, result)
+    return (features, advice_prompt)
 
-input_data , result = user_input_features()
+input_data , advice_prompt = user_input_features()
 
 # Display user input
 st.subheader('User Input Parameters')
@@ -113,6 +106,15 @@ if st.button('Predict'):
     prediction_text = prediction_labels.get(prediction[0], "Unknown")
     st.subheader('Prediction')
     st.write(f"Prediction: **{prediction_text}**")
+    
+    from gradio_client import Client
+    
+    client = Client("KingNish/Very-Fast-Chatbot")
+    result = client.predict(
+            Query=advice_prompt+ "diagonised with "+prediction_text,
+            api_name="/predict"
+    )
+    result = result.strip().replace("\n", "\n\n")  # Double newline = markdown list-friendly in Streamlit
     
 
     st.markdown("### 📋 Recommended Next Steps")
