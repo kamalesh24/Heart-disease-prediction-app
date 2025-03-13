@@ -116,7 +116,7 @@ if st.button('Predict'):
     )
     # result = result.strip().replace("\n", "\n\n")  # Double newline = markdown list-friendly in Streamlit
     
-
+    print(result)
     st.markdown("### 📋 Recommended Next Steps")
     st.markdown(f"""
             <div style="background-color: #f9f9f9; padding: 15px; border-left: 5px solid #0073e6; border-radius: 8px; margin-top: 10px;">
