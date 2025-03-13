@@ -3,10 +3,13 @@ import pickle
 import numpy as np
 import pandas as pd
 
-# Load the XGBoost model
-model_path = 'model.pkl'
-with open(model_path, 'rb') as f:
-    xgb_model = pickle.load(f)
+# Load the XGBoost model efficiently
+@st.cache_resource
+def load_model():
+    with open('model.pkl', 'rb') as f:
+        return pickle.load(f)
+
+xgb_model = load_model()
 
 # Function to make predictions
 def predict(input_data):
@@ -14,106 +17,96 @@ def predict(input_data):
     prediction = xgb_model.predict(input_df)
     return prediction
 
-# Streamlit user interface
-st.set_page_config(page_title='Heart Disease Prediction App', page_icon=':heart:', layout='wide')
-st.title('Heart Disease Prediction App')
-st.markdown("""
-<style>
-    .main {
-        background-color: #f5f5f5;
-    }
-    .stButton>button {
-        background-color: #4CAF50;
-        color: white;
-    }
-</style>
-""", unsafe_allow_html=True)
+# Streamlit UI Enhancements
+st.set_page_config(page_title='Heart Disease Prediction', page_icon='❤️', layout='wide')
 
-# User input fields
-st.sidebar.header('User Input Parameters')
+st.title('💖 Heart Disease Prediction & Advice')
+st.markdown("**Get AI-powered insights and personalized recommendations for heart health!**")
+
+# Sidebar Styling
+st.sidebar.image("https://cdn-icons-png.flaticon.com/512/2947/2947762.png", width=120)
+st.sidebar.header('🔍 User Input Parameters')
+
+# Collecting User Inputs
 def user_input_features():
-    age = st.sidebar.slider('Age', min_value=0, max_value=120, value=30)
-    sex = st.sidebar.selectbox('Sex', options=[0, 1], format_func=lambda x: 'Female' if x == 0 else 'Male')
-    cp = st.sidebar.selectbox('Chest Pain Type', options=[0, 1, 2, 3], format_func=lambda x: ['Asymptomatic', 'Atypical Angina', 'Non-Anginal', 'Typical Angina'][x])
-    trestbps = st.sidebar.slider('Resting Blood Pressure', min_value=90, max_value=200, value=120)
-    chol = st.sidebar.slider('Cholesterol', min_value=131, max_value=409, value=200)
-    fbs = st.sidebar.selectbox('Fasting Blood Sugar > 120 mg/dl', options=[0, 1], format_func=lambda x: 'No' if x == 0 else 'Yes')
-    restecg = st.sidebar.selectbox('Resting Electrocardiographic Results', options=[0, 1, 2], format_func=lambda x: ['Left Ventricular Hypertrophy', 'Normal', 'ST-T'][x])
-    thalach = st.sidebar.slider('Maximum Heart Rate Achieved', min_value=71, max_value=199, value=150)
-    exang = st.sidebar.selectbox('Exercise Induced Angina', options=[0, 1], format_func=lambda x: 'No' if x == 0 else 'Yes')
-    oldpeak = st.sidebar.slider('ST Depression Induced by Exercise', min_value=0.0, max_value=6.2, value=1.0)
-    slope = st.sidebar.selectbox('Slope of the Peak Exercise ST Segment', options=[0, 1, 2], format_func=lambda x: ['Downsloping', 'Flat', 'Upsloping'][x])
-    ca = st.sidebar.slider('Number of Major Vessels (0-3)', min_value=0, max_value=3, value=0)
-    thal = st.sidebar.selectbox('Thalassemia', options=[0, 1, 2], format_func=lambda x: ['Fixed', 'Normal', 'Reversible'][x])
-    
-    data = {
-        'age': age,
-        'sex': sex,
-        'cp': cp,
-        'trestbps': trestbps,
-        'chol': chol,
-        'fbs': fbs,
-        'restecg': restecg,
-        'thalach': thalach,
-        'exang': exang,
-        'oldpeak': oldpeak,
-        'slope': slope,
-        'ca': ca,
-        'thal': thal
+    age = st.sidebar.slider('Age', 0, 120, 30)
+    sex = st.sidebar.radio('Sex', [0, 1], format_func=lambda x: 'Female' if x == 0 else 'Male')
+    cp = st.sidebar.selectbox('Chest Pain Type', [0, 1, 2, 3], format_func=lambda x: ['Asymptomatic', 'Atypical Angina', 'Non-Anginal', 'Typical Angina'][x])
+    trestbps = st.sidebar.slider('Resting Blood Pressure (mmHg)', 90, 200, 120)
+    chol = st.sidebar.slider('Cholesterol (mg/dL)', 131, 409, 200)
+    fbs = st.sidebar.radio('Fasting Blood Sugar > 120 mg/dL?', [0, 1], format_func=lambda x: 'No' if x == 0 else 'Yes')
+    restecg = st.sidebar.selectbox('Resting ECG Results', [0, 1, 2], format_func=lambda x: ['LV Hypertrophy', 'Normal', 'ST-T Wave'][x])
+    thalach = st.sidebar.slider('Max Heart Rate Achieved', 71, 199, 150)
+    exang = st.sidebar.radio('Exercise-Induced Angina?', [0, 1], format_func=lambda x: 'No' if x == 0 else 'Yes')
+    oldpeak = st.sidebar.slider('ST Depression Induced by Exercise', 0.0, 6.2, 1.0)
+    slope = st.sidebar.selectbox('ST Segment Slope', [0, 1, 2], format_func=lambda x: ['Downsloping', 'Flat', 'Upsloping'][x])
+    ca = st.sidebar.slider('Major Vessels (0-3)', 0, 3, 0)
+    thal = st.sidebar.selectbox('Thalassemia Type', [0, 1, 2], format_func=lambda x: ['Fixed', 'Normal', 'Reversible'][x])
+
+    # Structuring Data
+    input_data = {
+        'age': age, 'sex': sex, 'cp': cp, 'trestbps': trestbps, 'chol': chol,
+        'fbs': fbs, 'restecg': restecg, 'thalach': thalach, 'exang': exang,
+        'oldpeak': oldpeak, 'slope': slope, 'ca': ca, 'thal': thal
     }
-    features = pd.DataFrame(data, index=[0])
 
+    # Generating a structured prompt for recommendations
+    advice_prompt = f"""A patient has been evaluated with these health metrics:
     
-    advice_prompt = f"""A patient has been evaluated based on the following medical parameters:
-
-                        Age: {age} years
-                        Sex: {'Male' if sex == 1 else 'Female'}
-                        Chest Pain Type: {['Asymptomatic', 'Atypical Angina', 'Non-Anginal', 'Typical Angina'][cp]}
-                        Resting Blood Pressure: {trestbps} mmHg
-                        Cholesterol Level: {chol} mg/dL
-                        Fasting Blood Sugar > 120 mg/dL: {'Yes' if fbs == 1 else 'No'}
-                        Resting Electrocardiographic Results: {['Left Ventricular Hypertrophy', 'Normal', 'ST-T'][restecg]}
-                        Maximum Heart Rate Achieved: {thalach} bpm
-                        Exercise Induced Angina: {'Yes' if exang == 1 else 'No'}
-                        ST Depression Induced by Exercise: {oldpeak}
-                        Slope of the Peak Exercise ST Segment: {['Downsloping', 'Flat', 'Upsloping'][slope]}
-                        Number of Major Vessels Colored by Fluoroscopy: {ca}
-                        Thalassemia Type: {['Fixed', 'Normal', 'Reversible'][thal]}
-
-                        Please provide a concise recommendation on how the patient can manage or improve their condition, including lifestyle changes, dietary adjustments, and medical advice."""
-                          
+    - **Age:** {age} years
+    - **Sex:** {'Male' if sex == 1 else 'Female'}
+    - **Chest Pain Type:** {['Asymptomatic', 'Atypical Angina', 'Non-Anginal', 'Typical Angina'][cp]}
+    - **Resting Blood Pressure:** {trestbps} mmHg
+    - **Cholesterol Level:** {chol} mg/dL
+    - **Fasting Blood Sugar > 120 mg/dL:** {'Yes' if fbs == 1 else 'No'}
+    - **Resting ECG Results:** {['LV Hypertrophy', 'Normal', 'ST-T Wave'][restecg]}
+    - **Max Heart Rate Achieved:** {thalach} bpm
+    - **Exercise Induced Angina:** {'Yes' if exang == 1 else 'No'}
+    - **ST Depression:** {oldpeak}
+    - **ST Segment Slope:** {['Downsloping', 'Flat', 'Upsloping'][slope]}
+    - **Major Vessels Colored by Fluoroscopy:** {ca}
+    - **Thalassemia Type:** {['Fixed', 'Normal', 'Reversible'][thal]}
     
-    return (features, advice_prompt)
+    Please provide expert medical advice on managing this condition. 
 
-input_data , advice_prompt = user_input_features()
+    """
+    return input_data, advice_prompt
 
-# Display user input
-st.subheader('User Input Parameters')
-st.write(input_data)
+input_data, advice_prompt = user_input_features()
 
-# Prediction button
-if st.button('Predict'):
+# Display User Inputs in an Expandable Section
+with st.expander("📌 View Your Entered Details"):
+    st.write(pd.DataFrame(input_data, index=[0]))
+
+# Prediction Button
+if st.button('🩺 Predict Heart Disease'):
     prediction = predict(input_data)
-    prediction_labels = {
-        0: "No Heart Disease",
-        1: "Arrhythmia",
-        2: "Cardiomyopathy",
-        3: "Congenital Heart Disease",
-        4: "Coronary Artery Disease",
-        5: "Heart Failure",
-        6: "Valvular Heart Disease"
+    diagnosis = {
+        0: "No Heart Disease ✅",
+        1: "Arrhythmia ⚠️",
+        2: "Cardiomyopathy ⚠️",
+        3: "Congenital Heart Disease ⚠️",
+        4: "Coronary Artery Disease ❗",
+        5: "Heart Failure ❗",
+        6: "Valvular Heart Disease ❗"
     }
-    prediction_text = prediction_labels.get(prediction[0], "Unknown")
-    st.subheader('Prediction')
-    st.write(f"Prediction: **{prediction_text}**")
-    
+    result = diagnosis.get(prediction[0], "Unknown")
+
+    # Show Prediction Result
+    if prediction[0] == 0:
+        st.success(f"**Diagnosis: {result}**\n\nYour heart is healthy! Keep up with a balanced diet and regular exercise. 💙")
+    else:
+        st.error(f"**Diagnosis: {result}**\n\nYou may need medical attention. Consult a cardiologist. 🏥")
+
+    # AI-Powered Health Advice
     from gradio_client import Client
-    
     client = Client("KingNish/Very-Fast-Chatbot")
-    result = client.predict(
-            Query=advice_prompt+ "diagonised with "+prediction_text +"provide ans in normal text",
-            api_name="/predict"
-    )
-    # result = result.strip().replace("\n", "\n\n")  # Double newline = markdown list-friendly in Streamlit
-    
-    st.write(result)
+    medical_advice = client.predict(Query=advice_prompt + f" Diagnosed with {result}. Provide a professional recommendation.", api_name="/predict")
+
+    # Display Medical Advice
+    st.subheader("🩺 AI-Generated Medical Advice")
+    st.write(medical_advice)
+
+# Footer with credits
+st.markdown("---")
+st.markdown("📝 Developed by **Your Name** | 🔗 [GitHub](https://github.com/yourusername) | 📧 Contact: your.email@example.com")
