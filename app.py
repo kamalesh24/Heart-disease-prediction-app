@@ -3,6 +3,8 @@ import pickle
 import numpy as np
 import pandas as pd
 
+st.set_page_config(page_title='Heart Disease Prediction', page_icon='❤️', layout='wide')
+
 # Load the XGBoost model efficiently
 @st.cache_resource
 def load_model():
@@ -17,8 +19,6 @@ def predict(input_data):
     prediction = xgb_model.predict(input_df)
     return prediction
 
-# Streamlit UI Enhancements
-st.set_page_config(page_title='Heart Disease Prediction', page_icon='❤️', layout='wide')
 
 st.title('💖 Heart Disease Prediction & Advice')
 st.markdown("**Get AI-powered insights and personalized recommendations for heart health!**")
